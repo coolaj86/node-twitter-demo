@@ -1,0 +1,15 @@
+{
+  "name": "twitter-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.3.4",
+    "jade": "*",
+    "passport": "~0.1.17",
+    "passport-twitter": "~0.1.5",
+    "oauth": "~0.9.10"
+  }
+}

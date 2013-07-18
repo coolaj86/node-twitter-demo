@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  //-
+    a(href="/authn/twitter") Sign in with Twitter
+    br
+  a(href="/authz/twitter") Authorize this Twitter App
+  br
+  a(href="/twitter/tweet") Make a Test Tweet
+  br
+  a(href="/twitter/direct/lbljeffmo") Make a Test DM
+  br
+  iframe(src="/authn/twitter")
