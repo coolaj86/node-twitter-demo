@@ -15,6 +15,8 @@ var express = require('express')
   , oa
   , twitterAuthn
   , twitterAuthz
+  , domain = "local.example.com"
+  , port = 3000
   ;
 
   function initTwitterOauth() {
@@ -27,7 +29,7 @@ var express = require('express')
     , config.consumerKey
     , config.consumerSecret
     , "1.0A"
-    , "http://local.coolaj86.com:3000/authn/twitter/callback"
+    , "http://" + domain + ":" + port + "/authn/twitter/callback"
     , "HMAC-SHA1"
     );
   }
@@ -37,7 +39,7 @@ var express = require('express')
       "https://api.twitter.com/1.1/statuses/update.json"
     , user.token
     , user.tokenSecret
-    , {"status":"Test Tweet from NodeJS + OAuth"}
+    , {"status": "How to Tweet & Direct Message using NodeJS http://blog.coolaj86.com/articles/how-to-tweet-from-nodejs.html via @coolaj86" }
     , cb
     );
   }
@@ -63,7 +65,7 @@ passport.deserializeUser(function(id, done) {
 twitterAuthn = new TwitterStrategy({
     consumerKey: config.consumerKey
   , consumerSecret: config.consumerSecret
-  , callbackURL: "http://local.coolaj86.com:3000/authn/twitter/callback"
+  , callbackURL: "http://" + domain + ":" + port + "/authn/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
     user.token = token;
@@ -78,7 +80,7 @@ twitterAuthn.name = 'twitterAuthn';
 twitterAuthz = new TwitterStrategy({
     consumerKey: config.consumerKey
   , consumerSecret: config.consumerSecret
-  , callbackURL: "http://local.coolaj86.com:3000/authz/twitter/callback"
+  , callbackURL: "http://" + domain + ":" + port + "/authz/twitter/callback"
   , userAuthorizationURL: 'https://api.twitter.com/oauth/authorize'
   },
   function(token, tokenSecret, profile, done) {
@@ -95,7 +97,7 @@ passport.use(twitterAuthn);
 passport.use(twitterAuthz);
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || port);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
