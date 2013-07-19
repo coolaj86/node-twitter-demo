@@ -1,9 +1,11 @@
 node-twitter-demo
 ===
 
+A demo that shows Authn, Authz, Tweeting, and Direct Messages with twitter.
+
 Upfront: If you're looking into any of the following libraries
 you're just wasting your time.
-They're mostly outdated and unnecessary.
+They're mostly outdated and or unnecessary.
 
   * node-twitter-api
   * twitter-api
@@ -11,6 +13,11 @@ They're mostly outdated and unnecessary.
   * twitter
 
 Instead you'll want to look at `node-oauth` and how it's used in this example.
+
+Not to say that those other libraries aren't valuable,
+but just get it working with OAuth first and then go
+back and figure out which one you want to try to fork
+and bring up to date (or add features to).
 
 ## Install this Demo
 
