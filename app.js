@@ -8,51 +8,53 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , app = express()
+  // server info
+  , domain = "local.example.com"
+  , port = process.env.PORT || 3000
+  // passport / twitter stuff
   , config = require('./config')
-  , user = { id: "abc" }
   , passport = require('passport')
   , TwitterStrategy = require('passport-twitter').Strategy
-  , oa
   , twitterAuthn
   , twitterAuthz
-  , domain = "local.example.com"
-  , port = 3000
+  // poor man's database stub
+  , user = { id: "abc" }
+  // oauth / twitter stuff
+  , OAuth= require('oauth').OAuth
+  , oa
   ;
 
-  function initTwitterOauth() {
-    var OAuth= require('oauth').OAuth
-      ;
+function initTwitterOauth() {
+  oa = new OAuth(
+    "https://twitter.com/oauth/request_token"
+  , "https://twitter.com/oauth/access_token"
+  , config.consumerKey
+  , config.consumerSecret
+  , "1.0A"
+  , "http://" + domain + ":" + port + "/authn/twitter/callback"
+  , "HMAC-SHA1"
+  );
+}
 
-    oa = new OAuth(
-      "https://twitter.com/oauth/request_token"
-    , "https://twitter.com/oauth/access_token"
-    , config.consumerKey
-    , config.consumerSecret
-    , "1.0A"
-    , "http://" + domain + ":" + port + "/authn/twitter/callback"
-    , "HMAC-SHA1"
-    );
-  }
+function makeTweet(cb) {
+  oa.post(
+    "https://api.twitter.com/1.1/statuses/update.json"
+  , user.token
+  , user.tokenSecret
+  , {"status": "How to Tweet & Direct Message using NodeJS http://blog.coolaj86.com/articles/how-to-tweet-from-nodejs.html via @coolaj86" }
+  , cb
+  );
+}
 
-  function makeTweet(cb) {
-    oa.post(
-      "https://api.twitter.com/1.1/statuses/update.json"
-    , user.token
-    , user.tokenSecret
-    , {"status": "How to Tweet & Direct Message using NodeJS http://blog.coolaj86.com/articles/how-to-tweet-from-nodejs.html via @coolaj86" }
-    , cb
-    );
-  }
-
-  function makeDm(sn, cb) {
-    oa.post(
-      "https://api.twitter.com/1.1/direct_messages/new.json"
-    , user.token
-    , user.tokenSecret
-    , {"screen_name": sn, text: "test message via nodejs twitter api. pulled your sn at random, sorry."}
-    , cb
-    );
-  }
+function makeDm(sn, cb) {
+  oa.post(
+    "https://api.twitter.com/1.1/direct_messages/new.json"
+  , user.token
+  , user.tokenSecret
+  , {"screen_name": sn, text: "test message via nodejs twitter api. pulled your sn at random, sorry."}
+  , cb
+  );
+}
 
 passport.serializeUser(function(_user, done) {
   done(null, user.id);
@@ -71,7 +73,6 @@ twitterAuthn = new TwitterStrategy({
     user.token = token;
     user.tokenSecret = tokenSecret;
     user.profile = profile;
-    initTwitterOauth();
     done(null, user);
   }
 );
@@ -97,17 +98,19 @@ passport.use(twitterAuthn);
 passport.use(twitterAuthz);
 
 // all environments
-app.set('port', process.env.PORT || port);
+app.set('port', port);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(express.cookieParser());
 app.use(express.methodOverride());
+// Passport needs express/connect's cookieParser and session
+app.use(express.cookieParser());
 app.use(express.session({ secret: "blahhnsnhoaeunshtoe" }));
 app.use(passport.initialize());
 app.use(passport.session());
+//  Passport MUST be initialize()d and session()d before the router
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -117,9 +120,9 @@ if ('development' === app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.get('/authn/twitter', passport.authenticate('twitterAuthn'));
+app.get('/twitter/authn', passport.authenticate('twitterAuthn'));
 app.get(
-  '/authn/twitter/callback'
+  '/twitter/authn/callback'
 , passport.authenticate(
     'twitterAuthn'
   , { successRedirect: '/authnframe.html'
@@ -127,9 +130,9 @@ app.get(
     }
   )
 );
-app.get('/authz/twitter', passport.authenticate('twitterAuthz'));
+app.get('/twitter/authz', passport.authenticate('twitterAuthz'));
 app.get(
-  '/authz/twitter/callback'
+  '/twitter/authz/callback'
 , passport.authenticate(
     'twitterAuthz'
   , { successRedirect: '/zsuccess'
@@ -160,6 +163,7 @@ app.get('/twitter/direct/:sn', function (req, res) {
   });
 });
 
+initTwitterOauth();
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

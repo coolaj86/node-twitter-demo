@@ -3,14 +3,11 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
-  //-
-    a(href="/authn/twitter") Sign in with Twitter
-    br
-  a(href="/authz/twitter") Authorize this Twitter App
+  a(href="/twitter/authn") Sign in with Twitter
+  br
+  a(href="/twitter/authz") Authorize this Twitter App
   br
   a(href="/twitter/tweet") Tweet a test message to @coolaj86
   br
   a(href="/twitter/direct/coolaj86") Send a test Direct Message to @coolaj86
   span (will probably fail as he may not be following you)
-  br
-  iframe(src="/authn/twitter")
