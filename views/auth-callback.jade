@@ -18,7 +18,8 @@ html
       */
 
       // or use the view template to put the account in straightway
-      window.opener.doLoginStuff(#{data});
+      //- !{foo} allows unsafe html to pass through whereas #{foo} escapes it
+      window.opener.doLoginStuff(!{user});
       //window.opener.doLoginStuff({ id: 'foo', name: 'bar' });
       window.close();
   body
