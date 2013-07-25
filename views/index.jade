@@ -3,7 +3,8 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
-  a(href="/twitter/authn") Sign in with Twitter
+  a(href="/twitter/authn", target="_blank")
+    img(src="https://dev.twitter.com/sites/default/files/images_documentation/sign-in-with-twitter-gray.png", alt="Sign in with Twitter")
   br
   a(href="/twitter/authz") Authorize this Twitter App
   br
@@ -11,3 +12,7 @@ block content
   br
   a(href="/twitter/direct/coolaj86") Send a test Direct Message to @coolaj86
   span (will probably fail as he may not be following you)
+  script.
+    window.doLoginStuff = function (user) {
+      console.log('login was complete', user);
+    };

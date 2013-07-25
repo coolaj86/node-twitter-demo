@@ -5,6 +5,7 @@
 
 var express = require('express')
   , routes = require('./routes')
+  , authCallback = require('./routes/auth-callback')
   , http = require('http')
   , path = require('path')
   , app = express()
@@ -31,7 +32,7 @@ function initTwitterOauth() {
   , config.consumerKey
   , config.consumerSecret
   , "1.0A"
-  , "http://" + domain + ":" + port + "/authn/twitter/callback"
+  , "http://" + domain + ":" + port + "/twitter/authn/callback"
   , "HMAC-SHA1"
   );
 }
@@ -67,7 +68,7 @@ passport.deserializeUser(function(id, done) {
 twitterAuthn = new TwitterStrategy({
     consumerKey: config.consumerKey
   , consumerSecret: config.consumerSecret
-  , callbackURL: "http://" + domain + ":" + port + "/authn/twitter/callback"
+  , callbackURL: "http://" + domain + ":" + port + "/twitter/authn/callback"
   },
   function(token, tokenSecret, profile, done) {
     user.token = token;
@@ -81,13 +82,14 @@ twitterAuthn.name = 'twitterAuthn';
 twitterAuthz = new TwitterStrategy({
     consumerKey: config.consumerKey
   , consumerSecret: config.consumerSecret
-  , callbackURL: "http://" + domain + ":" + port + "/authz/twitter/callback"
+  , callbackURL: "http://" + domain + ":" + port + "/twitter/authz/callback"
   , userAuthorizationURL: 'https://api.twitter.com/oauth/authorize'
   },
   function(token, tokenSecret, profile, done) {
     user.token = token;
     user.tokenSecret = tokenSecret;
     user.profile = profile;
+    user.authorized = true;
     initTwitterOauth();
     done(null, user);
   }
@@ -120,15 +122,23 @@ if ('development' === app.get('env')) {
 }
 
 app.get('/', routes.index);
+
 app.get('/twitter/authn', passport.authenticate('twitterAuthn'));
 app.get(
   '/twitter/authn/callback'
 , passport.authenticate(
     'twitterAuthn'
-  , { successRedirect: '/authnframe.html'
-    , failureRedirect: '/nfailure'
-    }
+  , { failureRedirect: '/nfailure' }
   )
+, function (req, res) {
+    // TODO if a direct message fails, remove this and try again
+    // the user may have unauthorized the app
+    if (!user.authorized) {
+      res.redirect('/twitter/authz');
+      return;
+    }
+    res.redirect('/auth-callback');
+  }
 );
 app.get('/twitter/authz', passport.authenticate('twitterAuthz'));
 app.get(
@@ -162,6 +172,9 @@ app.get('/twitter/direct/:sn', function (req, res) {
     }
   });
 });
+
+app.get('/auth-callback', authCallback.index);
+app.post('/auth-callback', authCallback.index);
 
 initTwitterOauth();
 http.createServer(app).listen(app.get('port'), function(){
