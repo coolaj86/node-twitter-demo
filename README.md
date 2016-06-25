@@ -2,7 +2,7 @@ node-twitter-demo
 ===
 
 **Tutorial & Screencast**:
-[How to Tweet from NodeJS](http://blog.coolaj86.com/articles/how-to-tweet-from-nodejs/)
+[How to Tweet from NodeJS](https://coolaj86.com/articles/how-to-tweet-from-nodejs.html)
 
 A demo that shows Authn, Authz, Tweeting, and Direct Messages with twitter.
 
